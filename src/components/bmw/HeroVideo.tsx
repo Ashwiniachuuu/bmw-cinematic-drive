@@ -78,13 +78,22 @@ export default function HeroVideo() {
     };
 
     if (vid.readyState >= 1) setup();
-    else vid.addEventListener("loadedmetadata", setup, { once: true });
+    else {
+      vid.addEventListener("loadedmetadata", setup, { once: true });
+      vid.addEventListener("durationchange", setup, { once: true });
+    }
+    // safety net: never leave the page un-pinned if metadata never arrives
+    const fallback = window.setTimeout(setup, 6000);
 
     return () => {
       disposed = true;
+      window.clearTimeout(fallback);
+      vid.removeEventListener("loadedmetadata", setup);
+      vid.removeEventListener("durationchange", setup);
       cancelAnimationFrame(raf);
       ctx?.revert();
     };
+
   }, []);
 
   return (
