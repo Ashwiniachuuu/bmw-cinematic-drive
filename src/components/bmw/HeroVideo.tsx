@@ -24,10 +24,14 @@ export default function HeroVideo() {
     let disposed = false;
     let ctx: gsap.Context | undefined;
 
+    let ready = false;
+
     const setup = () => {
-      if (disposed || !isFinite(vid.duration) || vid.duration <= 0) return;
-      const duration = vid.duration;
+      if (disposed || ready) return;
+      const duration = isFinite(vid.duration) && vid.duration > 0 ? vid.duration : 12;
+      ready = true;
       vid.pause();
+
 
       ctx = gsap.context(() => {
         const st = ScrollTrigger.create({
