@@ -1,24 +1,56 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
+import Nav from "@/components/bmw/Nav";
+import LogoIntro from "@/components/bmw/LogoIntro";
+import HeroVideo from "@/components/bmw/HeroVideo";
+import Sections from "@/components/bmw/Sections";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "BMW — The Ultimate Driving Machine | Cinematic Showcase" },
+      {
+        name: "description",
+        content:
+          "A cinematic BMW-inspired showcase: scroll-driven film, selected models, technology and contact — all on one premium page.",
+      },
+      { property: "og:title", content: "BMW — The Ultimate Driving Machine" },
+      {
+        property: "og:description",
+        content: "Scroll-driven cinematic BMW showcase with selected models and technology.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    const lenis = new Lenis({
+      duration: 0.9,
+      smoothWheel: true,
+      wheelMultiplier: 1.1,
+    });
+    lenis.on("scroll", ScrollTrigger.update);
+    const raf = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(raf);
+    gsap.ticker.lagSmoothing(0);
+    return () => {
+      gsap.ticker.remove(raf);
+      lenis.destroy();
+    };
+  }, []);
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="relative bg-background">
+      <Nav />
+      <LogoIntro />
+      <HeroVideo />
+      <Sections />
+    </main>
   );
 }
